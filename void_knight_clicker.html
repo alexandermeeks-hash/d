@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Void Knight Clicker</title>
+<style>
+*{box-sizing:border-box} body{margin:0;background:#070912;color:#e9e9f4;font-family:system-ui,Arial,sans-serif;overflow-x:hidden}
+.wrap{max-width:1100px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center}
+h1{margin:0;font-size:28px;letter-spacing:2px}.sub{color:#9297b5;font-size:13px}
+.card{background:linear-gradient(145deg,#111526,#0b0e19);border:1px solid #282e47;border-radius:16px;box-shadow:0 12px 35px #0008;padding:16px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.stat b{display:block;font-size:21px}.stat span{color:#8f94ad;font-size:12px}
+.arena{position:relative;min-height:380px;display:grid;place-items:center;overflow:hidden}
+.mist{position:absolute;inset:0;background:radial-gradient(circle at 50% 45%,#252c48 0,#111526 35%,#080a12 75%);opacity:.9}
+.moon{position:absolute;width:150px;height:150px;border-radius:50%;background:#d9deef;box-shadow:0 0 60px #bbc7ff77;top:25px;right:12%}
+.ground{position:absolute;bottom:25px;width:88%;height:8px;background:#42465b;border-radius:50%;box-shadow:0 10px 25px #000}
+.enemy{position:relative;z-index:2;width:170px;height:190px;display:grid;place-items:center;cursor:pointer;transition:transform .08s;user-select:none}
+.enemy.hit{transform:scale(.93) rotate(-2deg)} 
+.boss-party{position:relative;z-index:2;display:flex;align-items:end;gap:18px;transform:translateY(8px)}
+.miniboss{width:90px;height:120px;position:relative;display:grid;place-items:center;cursor:pointer;user-select:none}
+.miniboss .body{width:62px;height:82px;border-radius:50%;background:#9ea4bc;box-shadow:0 7px 0 #666c82,0 10px 20px #0008}
+.miniboss .eye{width:10px;height:15px;top:32px}
+.miniboss .eye.l{left:17px}.miniboss .eye.r{right:17px}
+.miniboss .horn{position:absolute;width:25px;height:40px;background:#b9bdd0;top:0;left:12px;border-radius:80% 20%;transform:rotate(15deg)}
+.miniboss .horn.r{left:auto;right:12px;transform:scaleX(-1) rotate(15deg)}
+.hornetboss{width:180px!important;height:215px!important}
+.hornetboss .body{width:115px!important;height:150px!important;background:#e0c8c1!important;box-shadow:0 9px 0 #a78d8c,0 20px 30px #0008!important}
+.hornetboss .eye{background:#17131c!important;width:18px!important;height:27px!important;top:58px!important}
+.hornetboss .eye.l{left:30px!important}.hornetboss .eye.r{right:30px!important}
+.hornetboss:after{content:"";position:absolute;width:150px;height:8px;background:#b12b45;top:125px;left:15px;border-radius:50%}
+width:105px;height:125px;border-radius:50% 50% 45% 45%;background:#d9dbea;box-shadow:0 8px 0 #a8acc2,0 20px 30px #0008;position:relative}
+.enemy .horn{position:absolute;width:44px;height:70px;background:#d9dbea;top:-28px;border-radius:80% 20% 80% 20%;transform:rotate(18deg);left:25px}.enemy .horn.r{transform:scaleX(-1) rotate(18deg);left:auto;right:25px}
+.eye{position:absolute;width:16px;height:24px;background:#111421;border-radius:50%;top:48px}.eye.l{left:29px}.eye.r{right:29px}
+.hp{position:absolute;z-index:4;top:15px;width:300px;max-width:70%;height:18px;border:2px solid #4b526e;border-radius:20px;overflow:hidden;background:#0a0c14}.hp i{display:block;height:100%;background:linear-gradient(90deg,#9d79ff,#d9c8ff);width:100%;transition:.15s}
+.name{position:absolute;z-index:4;top:0;font-weight:800;letter-spacing:1px}.damage{position:absolute;z-index:5;color:#fff;font-weight:900;font-size:26px;pointer-events:none;animation:float .7s forwards}
+@keyframes float{to{transform:translateY(-70px);opacity:0}}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}.btns{display:flex;flex-wrap:wrap;gap:8px}
+button{border:1px solid #3b4261;background:#181d31;color:#eee;padding:11px 14px;border-radius:10px;font-weight:700;cursor:pointer}button:hover{background:#252b46}button:disabled{opacity:.45;cursor:not-allowed}
+.attack{font-size:20px;background:#33235c}.attack:hover{background:#463076}
+.shop{display:grid;gap:8px}.shop button{text-align:left;display:flex;justify-content:space-between}
+.log{height:150px;overflow:auto;color:#aeb3ca;font-size:13px;line-height:1.5}.boss{background:#251426;border-color:#62365b}
+input{background:#090c15;color:white;border:1px solid #363d58;padding:11px;border-radius:9px;width:100%}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}.controls{grid-template-columns:1fr}.moon{right:-30px}.arena{min-height:340px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div><h1>VOID KNIGHT: CLICKER</h1><div class="sub">A bug-knight-inspired clicker RPG • original characters & visuals</div></div>
+  <button onclick="resetGame()">Reset</button></div>
+
+  <div class="stats">
+    <div class="card stat"><span>SOUL</span><b id="soul">0</b></div>
+    <div class="card stat"><span>ESSENCE</span><b id="essence">0</b></div>
+    <div class="card stat"><span>DAMAGE</span><b id="dmg">1</b></div>
+    <div class="card stat"><span>CRIT</span><b id="crit">5%</b></div>
+  </div>
+
+  <div class="card arena" id="arena">
+    <div class="mist"></div><div class="moon"></div><div class="ground"></div>
+    <div class="name" id="enemyName">DUSTLING</div>
+    <div class="hp"><i id="hpbar"></i></div>
+    <div class="boss-party" id="party">
+      <div class="miniboss" id="mini1" onclick="attackMini(0)">
+        <div class="horn"></div><div class="horn r"></div>
+        <div class="body"><div class="eye l"></div><div class="eye r"></div></div>
+      </div>
+      <div class="enemy" id="enemy" onclick="attack()">
+        <div class="horn"></div><div class="horn r"></div>
+        <div class="body"><div class="eye l"></div><div class="eye r"></div></div>
+      </div>
+      <div class="miniboss" id="mini2" onclick="attackMini(1)">
+        <div class="horn"></div><div class="horn r"></div>
+        <div class="body"><div class="eye l"></div><div class="eye r"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="card">
+      <div class="btns">
+        <button class="attack" onclick="attack()">⚔ STRIKE</button>
+        <button onclick="heal()">✦ FOCUS (heal)</button>
+        <button onclick="useSpell()">☄ SOUL BURST</button>
+      </div>
+      <p class="sub">Click the enemy or press SPACE to strike. Every defeated foe changes into a new enemy. Some encounters become bosses.</p>
+      <div class="log" id="log"></div>
+    </div>
+
+    <div class="card">
+      <h3>CHARM FORGE</h3>
+      <div class="shop">
+        <button onclick="buy('damage')">Nail Training <span id="damageCost"></span></button>
+        <button onclick="buy('crit')">Sharp Edge <span id="critCost"></span></button>
+        <button onclick="buy('auto')">Shade Familiar <span id="autoCost"></span></button>
+        <button onclick="buy('soul')">Soul Vessel <span id="soulCost"></span></button>
+      </div>
+      <h3>CHEAT / TEST BAR</h3>
+      <input id="code" placeholder="Try: soul_1000, crit_max, 1000000_damage, boss_now, hornet">
+      <button style="margin-top:8px" onclick="runCode()">Activate Code</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const enemies=[
+ ["Dustling",18,3,1],["Moss Crawler",35,5,2],["Crystal Mite",70,8,4],
+ ["Gloom Wisp",120,12,7],["Shell Brute",220,20,12],["Forgotten Sentinel",420,35,25]
+];
+let s=JSON.parse(localStorage.getItem("voidKnightSave")||"null")||{
+ soul:0,essence:0,damage:1,crit:0.05,auto:0,soulPower:0,enemy:0,hp:18,max:18,boss:false,kills:0
+};
+let current=null, cooldown=false;
+let miniHP=[0,0], miniMax=[0,0], miniAlive=[false,false];
+
+function fmt(n){return Math.floor(n).toLocaleString()}
+function save(){localStorage.setItem("voidKnightSave",JSON.stringify(s))}
+function log(t){let e=document.getElementById("log");e.innerHTML="<div>• "+t+"</div>"+e.innerHTML}
+function spawn(forceBoss=false){
+ let idx=Math.min(s.enemy,enemies.length-1), e=enemies[idx];
+ s.boss=forceBoss||Math.random()<.10;
+ let hornet=s.boss && (forceBoss || Math.random()<.25);
+ let mult=s.boss?7:1;
+ current=hornet
+   ? {name:"⚔ HORNET THE PRINCESS",base:10000000000,contact:500,reward:100000}
+   : {name:s.boss?"☾ ABYSSAL "+e[0]:e[0],base:e[1]*mult,contact:e[2]*mult,reward:e[3]*mult};
+ s.max=current.base*(hornet?1:1+s.kills*.025); s.hp=s.max;
+ document.getElementById("enemyName").textContent=current.name;
+ document.getElementById("party").classList.toggle("hornet-party",hornet);
+ document.getElementById("enemy").classList.toggle("hornetboss",hornet);
+ miniAlive=[hornet,hornet]; miniMax=hornet?[2500000000,3500000000]:[0,0]; miniHP=[...miniMax];
+ document.getElementById("mini1").style.display=hornet?"grid":"none";
+ document.getElementById("mini2").style.display=hornet?"grid":"none";
+ document.querySelector(".arena").classList.toggle("boss",s.boss);
+ log(s.boss?"BOSS ENCOUNTER! "+current.name:"A new foe appears: "+current.name);
+ render(); save();
+}
+function attack(){
+ if(!current||s.hp<=0)return;
+ let crit=Math.random()<s.crit, d=s.damage*(crit?3:1);
+ s.hp=Math.max(0,s.hp-d);
+ pop((crit?"CRIT! ":"")+fmt(d));
+ document.getElementById("enemy").classList.add("hit");setTimeout(()=>document.getElementById("enemy").classList.remove("hit"),90);
+ if(s.hp<=0) defeat(); else {enemyTurn();render();}
+ save();
+}
+function attackMini(i){
+ if(!miniAlive[i]||miniHP[i]<=0)return;
+ let crit=Math.random()<s.crit, d=s.damage*(crit?3:1);
+ miniHP[i]=Math.max(0,miniHP[i]-d); pop((crit?"CRIT! ":"")+fmt(d));
+ if(miniHP[i]<=0){miniAlive[i]=false;document.getElementById("mini"+(i+1)).style.display="none";log("Mini-boss defeated!");}
+ render();save();
+}
+function enemyTurn(){
+ if(cooldown||!current)return;
+ cooldown=true;setTimeout(()=>{cooldown=false;if(s.hp>0){let hit=current.contact;
+ if(miniAlive[0]) hit+=100;
+ if(miniAlive[1]) hit+=150;
+ s.soul=Math.max(0,s.soul-hit);
+ log(current.name+" and allies attack for "+hit+" soul.");
+ render();save()}},280);
+}
+function defeat(){
+ let reward=current.reward*(s.boss?2:1);
+ s.soul+=reward;s.essence+=s.boss?3:1;s.kills++;
+ log("Defeated "+current.name+"! +"+reward+" soul.");
+ s.enemy=(s.enemy+1)%enemies.length;
+ if(s.kills%5===0) s.enemy=Math.min(enemies.length-1,s.enemy+1);
+ setTimeout(()=>spawn(),250);
+}
+function heal(){
+ let cost=8;
+ if(s.soul>=cost){s.soul-=cost;log("You focus your soul and recover.");render();save()}
+ else log("Not enough soul to focus.");
+}
+function useSpell(){
+ let cost=25;
+ if(s.soul<cost){log("Need 25 soul for Soul Burst.");return}
+ s.soul-=cost;let d=20+s.soulPower*10;
+ s.hp=Math.max(0,s.hp-d);pop("BURST "+d);
+ if(s.hp<=0)defeat();else enemyTurn();render();save();
+}
+function buy(type){
+ let costs={damage:Math.floor(20*Math.pow(1.55,s.damage-1)),crit:Math.floor(80*Math.pow(1.8,s.crit/0.05-1)),auto:Math.floor(120*Math.pow(1.7,s.auto)),soul:Math.floor(100*Math.pow(1.7,s.soulPower))};
+ let c=costs[type];if(s.essence<c){log("Need "+c+" essence.");return}
+ s.essence-=c;
+ if(type==="damage")s.damage++;
+ if(type==="crit")s.crit=Math.min(.75,s.crit+.05);
+ if(type==="auto")s.auto++;
+ if(type==="soul")s.soulPower++;
+ log("Upgrade purchased.");render();save();
+}
+function pop(text){
+ let d=document.createElement("div");d.className="damage";d.textContent=text;
+ d.style.left=(45+Math.random()*15)+"%";d.style.top=(45+Math.random()*10)+"%";
+ document.getElementById("arena").appendChild(d);setTimeout(()=>d.remove(),700);
+}
+function runCode(){
+ let c=document.getElementById("code").value.trim().toLowerCase();
+ if(c==="soul_1000"){s.soul+=1000;log("TEST CODE: +1000 soul.");}
+ else if(c==="crit_max"){s.crit=.75;log("TEST CODE: critical chance maxed.");}
+ else if(c==="1000000_damage"){s.damage=1000000;log("TEST CODE: DAMAGE SET TO 1,000,000!");}
+ else if(c==="boss_now"){spawn(true);return}
+ else if(c==="hornet"){spawn(true);return}
+ else if(c==="max_power"){s.damage=1000000;s.crit=.75;s.auto=10;s.soulPower=10;log("TEST CODE: max power.");}
+ else {log("Unknown code.");}
+ render();save();
+}
+function render(){
+ document.getElementById("soul").textContent=fmt(s.soul);
+ document.getElementById("essence").textContent=fmt(s.essence);
+ document.getElementById("dmg").textContent=fmt(s.damage);
+ document.getElementById("crit").textContent=Math.round(s.crit*100)+"%";
+ document.getElementById("hpbar").style.width=(100*s.hp/s.max)+"%";
+ document.getElementById("damageCost").textContent=Math.floor(20*Math.pow(1.55,s.damage-1))+" essence";
+ document.getElementById("critCost").textContent=Math.floor(80*Math.pow(1.8,s.crit/0.05-1))+" essence";
+ document.getElementById("autoCost").textContent=Math.floor(120*Math.pow(1.7,s.auto))+" essence";
+ document.getElementById("soulCost").textContent=Math.floor(100*Math.pow(1.7,s.soulPower))+" essence";
+}
+function resetGame(){if(confirm("Reset all progress?")){localStorage.removeItem("voidKnightSave");location.reload()}}
+document.addEventListener("keydown",e=>{if(e.code==="Space"){e.preventDefault();attack()}});
+setInterval(()=>{if(s.auto>0&&current&&s.hp>0){s.hp=Math.max(0,s.hp-s.auto*s.damage);if(s.hp<=0)defeat();render();save()}},1000);
+spawn();
+</script>
+</body>
+</html>
